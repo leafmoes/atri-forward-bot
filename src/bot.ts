@@ -1,5 +1,6 @@
 import { Bot, Context } from 'grammyjs'
 import { User } from 'types-manage'
+import { autoThread } from "auto-thread";
 import { config } from './config.ts'
 import { createSession, kv } from './kv.ts'
 import { AtriContext } from './type.ts'
@@ -8,7 +9,7 @@ export const bot = new Bot<AtriContext>(config.BOT_TOKEN || '')
 
 const isAdmin = (ctx: Context) => ctx.from?.id == config.ADMIN_ID
 const isBoundGroup = (ctx: Context) => ctx.chatId == config.SUPERGROUPS_ID
-
+bot.use(autoThread())
 bot.command('regcmd', async (ctx) => {
 	await ctx.api.setMyCommands([
 		{ command: 'start', description: '开始对话' },

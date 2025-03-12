@@ -22,6 +22,7 @@
     "types-manage": "https://deno.land/x/grammy_types@v3.19.0/manage.ts",
     "grammy_commands":"https://deno.land/x/grammy_commands@v1.0.5/mod.ts",
     "grammy_i18n": "https://deno.land/x/grammy_i18n@v1.1.0/mod.ts",
+    "auto-thread": "https://raw.githubusercontent.com/grammyjs/auto-thread/refs/heads/main/src/mod.ts",
     "dotenv": "https://deno.land/std@0.224.0/dotenv/mod.ts",
     "denokv": "https://deno.land/x/grammy_storages/denokv/src/mod.ts"
   }
