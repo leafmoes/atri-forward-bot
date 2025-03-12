@@ -48,8 +48,9 @@
 ### 2. 部署
 
 1. Fork 本项目到你的Github
-2. 前往 [Deno 新建项目](https://dash.deno.com/new_project)，如果没有登录请使用 Github 登入 Deno，然后进行操作。
-3. 选择你 Fork 的项目，然后设置环境变量，点击 Deploy Project 开始部署。
+2. 前往 [Deno 新建项目](https://dash.deno.com/new)，如果没有登录请使用 Github 登入 Deno，然后进行操作。
+3. 点击 `Create an empty project` 创建一个空项目，然后点击 `Settings` 设置项目名称以及添加刚才获取的三个环境变量值 `BOT_TOKEN` 、`ADMIN_ID` 、`SUPERGROUPS_ID`
+4. 在 Git Integration 选择你 Fork 的仓库进行连接，`Entrypoint` 设置为 `src/server.ts`，然后点击部署。
 4. 浏览器访问 `https://api.telegram.org/bot<BOT_TOKEN>/setWebhook?url=https://<YOUR_DENO_PROJECT>.deno.dev/<BOT_TOKEN>` 进行 Webhook 注册（注意替换啊，别是笨蛋）。
 5. 把你的机器人拉入到你要作为接收陌生人消息的群组，并给予管理员权限（消息和话题操作的权限都必须留下，否则无法正常工作）
 6. （可选）在绑定的群组里面发送 `/regcmd` 来注册一些命令（`/info`，`/ban`，`/unban`）的提示。
