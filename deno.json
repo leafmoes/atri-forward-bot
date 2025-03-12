@@ -1,0 +1,28 @@
+{
+    "fmt": {
+    "useTabs": true,
+    "lineWidth": 80,
+    "indentWidth": 4,
+    "semiColons": false,
+    "singleQuote": true,
+    "proseWrap": "preserve",
+    "include": [
+      "src/"
+    ],
+    "exclude": []
+  },
+  "tasks": {
+    "run": "deno run --unstable-kv --allow-import --allow-net --allow-read --allow-env --watch src/poll.ts",
+    "deploy": "deployctl deploy --project=atri-forward-bot --save-config src/server.ts",
+    "deployPROD": "deployctl deploy --project=atri-forward-bot --prod --save-config src/server.ts"
+  },
+  "lock": false,
+  "imports": {
+    "grammyjs": "https://deno.land/x/grammy@v1.35.0/mod.ts",
+    "types-manage": "https://deno.land/x/grammy_types@v3.19.0/manage.ts",
+    "grammy_commands":"https://deno.land/x/grammy_commands@v1.0.5/mod.ts",
+    "grammy_i18n": "https://deno.land/x/grammy_i18n@v1.1.0/mod.ts",
+    "dotenv": "https://deno.land/std@0.224.0/dotenv/mod.ts",
+    "denokv": "https://deno.land/x/grammy_storages/denokv/src/mod.ts"
+  }
+}
