@@ -1,6 +1,6 @@
-import { Bot, Context } from 'grammyjs'
+import { Bot, Context, InlineKeyboard } from 'grammyjs'
 import { User } from 'types-manage'
-import { autoThread } from "auto-thread";
+import { autoThread } from 'auto-thread'
 import { config } from './config.ts'
 import { createSession, kv } from './kv.ts'
 import { AtriContext } from './type.ts'
@@ -19,6 +19,8 @@ bot.command('regcmd', async (ctx) => {
 	await ctx.api.setMyCommands([
 		{ command: 'info', description: '获取当前话题对应用户信息' },
 		{ command: 'ban', description: '拉黑当前话题对应的用户' },
+		{ command: 'unban', description: '解除拉黑当前话题对应的用户' },
+		{ command: 'rmchat', description: '删除当前话题' },
 	], {
 		scope: {
 			type: 'chat_member',
@@ -79,9 +81,16 @@ bot.chatType('private').on(['message', 'edited_message'], async (ctx) => {
 				return ctx.reply('⛔️ 系统繁忙，请稍后再试')
 			}
 		}
-		ctx.forwardMessage(config.SUPERGROUPS_ID, {
-			message_thread_id: threadId.value,
-		})
+		try {
+			await ctx.forwardMessage(config.SUPERGROUPS_ID, {
+				message_thread_id: threadId.value,
+			})
+		} catch (_) {
+			const threadId = await createSession(bot, ctx.from)
+			ctx.forwardMessage(config.SUPERGROUPS_ID, {
+				message_thread_id: threadId,
+			})
+		} 
 	}
 })
 
@@ -97,12 +106,17 @@ bot.chatType('supergroup').command('info').filter(
 			if (!userInfo.value) {
 				ctx.reply('⚠️ 当前会话用户信息丢失！请联系管理员！')
 			} else {
+				const fullname = userInfo.value.first_name +
+					(userInfo.value.last_name || '')
+				const username = userInfo.value.username
+					? `@${userInfo.value.username}`
+					: '无'
 				await ctx.reply(
 					`
 📌 用户信息：
 ID: <code>${userInfo.value.id}</code>
-昵称: <a href="tg://user?id=${userInfo.value.id}">${userInfo.value.first_name} ${userInfo.value.last_name}</a>
-用户名: @${userInfo.value.username}`,
+昵称: <a href="tg://user?id=${userInfo.value.id}">${fullname}</a>
+用户名: ${username}`,
 					{
 						parse_mode: 'HTML',
 					},
@@ -147,6 +161,48 @@ bot.on('msg:forum_topic_reopened').filter(
 	banUser(false),
 )
 
+bot.chatType('supergroup').command('rmchat').filter(
+	(ctx) => isBoundGroup(ctx) && isAdmin(ctx),
+	async (ctx) => {
+		const threadId = Number(ctx.msg.message_thread_id)
+		const inlineKeyboard = new InlineKeyboard().text(
+			'确认',
+			`confirm_remove_topic:${threadId}`,
+		).text('取消', `cancel_remove_topic:${threadId}`)
+		await ctx.reply(
+			'⚠️ 确认删除当前会话？',
+			{ reply_markup: inlineKeyboard },
+		)
+	},
+)
+
+bot.callbackQuery(/confirm_remove_topic:[0-9]+/).filter(
+	(ctx) => isBoundGroup(ctx) && isAdmin(ctx),
+	async (ctx) => {
+		const threadId = Number(ctx.callbackQuery.data.split(':')[1])
+		const userId = await kv.get<number>(['thread_to_user', threadId])
+		await ctx.answerCallbackQuery('✅ 已删除当前会话！')
+		const result = await ctx.deleteForumTopic()
+		if (!result) {
+			ctx.answerCallbackQuery('❌ 删除会话失败，请稍后再试！')
+			return
+		}
+		if (userId.value) {
+			kv.delete(['thread_to_user', threadId])
+			kv.delete(['user_to_thread', userId.value])
+			return
+		}
+	},
+)
+
+bot.callbackQuery(/cancel_remove_topic:[0-9]+/).filter(
+	(ctx) => isBoundGroup(ctx) && isAdmin(ctx),
+	(ctx) => {
+		ctx.answerCallbackQuery('❌ 已取消删除当前会话！')
+		ctx.deleteMessage()
+	},
+)
+
 bot.chatType('supergroup').on(['message', 'edited_message']).filter(
 	(ctx) => isBoundGroup(ctx) && isAdmin(ctx),
 	async (ctx) => {
@@ -154,8 +210,10 @@ bot.chatType('supergroup').on(['message', 'edited_message']).filter(
 		const userId = await kv.get<number>(['thread_to_user', threadId])
 		if (!userId.value) {
 			ctx.reply('⚠️ 当前会话未绑定用户！')
-		} else {
+		} else if (await ctx.api.getChat(userId.value).catch(() => false)) {
 			ctx.forwardMessage(userId.value)
+		} else {
+			ctx.reply('⚠️ 当前会话所属用户已销号！')
 		}
 	},
 )

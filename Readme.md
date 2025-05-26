@@ -31,6 +31,8 @@
 
 `/unban` : 在话题内直接使用，会解除封禁该话题对应的用户
 
+`/rmchat` : 在话题内直接使用，删除当前话题
+
 `/about` : 向用户发送关于信息，信息内容可通过环境变量 `ABOUT_MESSAGE` 自定义
 
 `/help` : 向用户发送帮助信息，如果是管理员会展示命令菜单，如果是陌生人会发送欢迎信息。
@@ -53,7 +55,7 @@
 4. 在 Git Integration 选择你 Fork 的仓库进行连接，`Entrypoint` 设置为 `src/server.ts`，然后点击部署。
 4. 浏览器访问 `https://api.telegram.org/bot<BOT_TOKEN>/setWebhook?url=https://<YOUR_DENO_PROJECT>.deno.dev/<BOT_TOKEN>` 进行 Webhook 注册（注意替换啊，别是笨蛋）。
 5. 把你的机器人拉入到你要作为接收陌生人消息的群组，并给予管理员权限（消息和话题操作的权限都必须留下，否则无法正常工作）
-6. （可选）在绑定的群组里面发送 `/regcmd` 来注册一些命令（`/info`，`/ban`，`/unban`）的提示。
+6. （可选）在绑定的群组里面发送 `/regcmd` 来注册一些命令（`/info`，`/ban`，`/unban`, `/rmchat`）的提示。
 
 ## 常见问题
 

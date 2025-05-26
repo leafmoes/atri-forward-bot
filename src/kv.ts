@@ -16,8 +16,6 @@ export async function createSession(bot: Bot<AtriContext>, user: User) {
 	const threadKey = ['thread_to_user', threadId]
 	const infoKey = ['user_info', user.id]
 	const res = await kv.atomic()
-		.check({ key: userKey, versionstamp: null })
-		.check({ key: threadKey, versionstamp: null })
 		.set(userKey, threadId)
 		.set(threadKey, user.id)
 		.set(infoKey, user)
