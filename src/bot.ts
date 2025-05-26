@@ -90,7 +90,7 @@ bot.chatType('private').on(['message', 'edited_message'], async (ctx) => {
 			ctx.forwardMessage(config.SUPERGROUPS_ID, {
 				message_thread_id: threadId,
 			})
-		} 
+		}
 	}
 })
 
@@ -208,9 +208,16 @@ bot.chatType('supergroup').on(['message', 'edited_message']).filter(
 	async (ctx) => {
 		const threadId = Number(ctx.msg.message_thread_id)
 		const userId = await kv.get<number>(['thread_to_user', threadId])
+		const isDelectedAccount = async (user_id: number) => {
+			const info = await ctx.api.getChat(user_id)
+			return !info.first_name
+		}
 		if (!userId.value) {
 			ctx.reply('⚠️ 当前会话未绑定用户！')
-		} else if (await ctx.api.getChat(userId.value).catch(() => false)) {
+			return
+		}
+		const isDeleted = await isDelectedAccount(userId.value)
+		if (!isDeleted) {
 			ctx.forwardMessage(userId.value)
 		} else {
 			ctx.reply('⚠️ 当前会话所属用户已销号！')
